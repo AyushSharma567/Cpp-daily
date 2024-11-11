@@ -3,35 +3,32 @@
 class Solution {
 public:
     int maxFrequency(vector<int>& nums, int k, int numOperations) {
-        int n = nums.size();
-        sort(nums.begin(), nums.end());
-        
-        int maxFrequency = 1;
-        for (int i = 0; i < n; i++) {
-            int target = nums[i],operations = numOperations, frequency = 1;  
-            for (int j = i - 1; j >= 0 && operations > 0; j--) {
-                if (abs(target - nums[j]) <= k) {
-                    frequency++;
-                    operations--;
-                }
-            }
-            for (int j = i + 1; j < n && operations > 0; j++) {
-                if (abs(nums[j] - target) <= k) {
-                    frequency++;
-                    operations--;
-                }
-            }
-            
-            maxFrequency = max(maxFrequency, frequency);
+        int n = nums.size(), ans = 0, left = 0, right = 0;
+        sort(nums.begin(), nums.end());  
+        unordered_map<int, int> count;
+        for (int num : nums) {
+            count[num]++;
         }
-        for (int i = 0; i < n; i++) {
-            for (int j = i + 1; j < n; j++) {
-                if (abs(nums[i] - nums[j]) <= 2 * k && numOperations >= 2) {
-                    maxFrequency = max(maxFrequency, 2);
-                }
+        for (int mid = 0; mid < n; mid++) {
+            while (nums[mid] - nums[left] > k) {
+                left++;
             }
+            while (right < n - 1 && nums[right + 1] - nums[mid] <= k) {
+                right++;
+            }
+            int total = right - left + 1;  
+            ans = max(ans, min(total - count[nums[mid]], numOperations) + count[nums[mid]]);
         }
-        
-        return maxFrequency;
+        left = 0;
+        for (right = 0; right < n; right++) {
+            int mid = (nums[left] + nums[right]) / 2;  
+            while (mid - nums[left] > k || nums[right] - mid > k) {
+                left++;
+                mid = (nums[left] + nums[right]) / 2;
+            }
+            ans = max(ans, min(right - left + 1, numOperations));
+        }
+
+        return ans;
     }
 };
